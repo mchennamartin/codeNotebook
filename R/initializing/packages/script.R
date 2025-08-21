@@ -4,45 +4,49 @@
 # function loads listed package and downloads if needed,
 # I will eventually make it work with a list of functions in later versions
 
-# Function --------------------------------------------------------------------
+# FUNCTIONS --------------------------------------------------------------------
 load <- function(package){
   # package - character - represents package or packages to install e.g. 'dplyr', 'limma'
 
   # determine whether it is one package or a list of them, by detecting commas
-  checkList <- grepl(', ', package)
+  check_if_list <- any(grepl(',' , package))
   # if package variable has commas, checkList will return True
 
   # for listed input
-  if(checkList == TRUE){
+  if(check_if_list == TRUE){
     # create list type from character/string
-    packageList <- strsplit(package, ', ')
-    packageList <- packageList[[1]]
+    package_list <- strsplit(package, ', ')
+    package_list <- package_list[[1]]
 
     # look at number of elements in packageList
-    packageNumber <- length(packageList)
+    number_of_packages <- length(package_list)
 
     # create loop with length equal to number of packages
-    for(i in 1:packageNumber){
-      if(!require(packageList[[i]], character.only = TRUE)){
-        install.packages(packageList[[i]], ask = FALSE)
+    for(i in 1:number_of_packages){
+
+      # if package isn't installed, install it
+      if(!require(package_list[[i]], character.only = TRUE)){
+        install.packages(package_list[[i]], ask = FALSE)
       }
-      # check to see if package installed, or if there was an error.
-      # if packages is not installed yet, repeat with biocmanager
-      if(!require(packageList[[i]], character.only = TRUE)){
+
+      # if packages is still not installed yet, biocmanager installer is required
+      if(!require(package_list[[i]], character.only = TRUE)){
         if (!require("BiocManager", quietly = TRUE))
         install.packages("BiocManager")
 
-        BiocManager::install(packageList[[i]], ask = FALSE)
+        BiocManager::install(package_list[[i]], ask = FALSE)
        }
 
-    # load package into environment
-    library(packageList[[i]], character.only = TRUE)
+    # load package into environment once installed
+
+    library(package_list[[i]], character.only = TRUE)
+
     }
     }
 
 
   # for sole input
-  if(checkList == FALSE){
+  if(check_if_list == FALSE){
      if(!require(package, character.only = TRUE)){
         install.packages(package, ask = FALSE)
       }
@@ -61,9 +65,3 @@ load <- function(package){
 
   }
 
-# Test -------------------------------------
-# now install/load packages with one line:
-load('dplyr')
-
-packageList <- 'limma, dplyr'
-load(packageList)
